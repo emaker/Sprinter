@@ -2,9 +2,11 @@
 // Licence: GPL
 
 #include "fastio.h"
+//#include "Configuration.h"
+//#include "pins.h"
 #include "Configuration.h"
-#include "pins.h"
 #include "Sprinter.h"
+#include <EEPROM.h>
 
 #ifdef SDSUPPORT
 #include "SdFat.h"
@@ -55,6 +57,7 @@
 // M190 - Wait for bed current temp to reach target temp.
 // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
+// M203 - Adjust Z height
 
 
 //Stepper Movement Variables
@@ -91,6 +94,7 @@ float axis_diff[NUM_AXIS] = {0, 0, 0, 0};
   long long_step_delay_ratio = STEP_DELAY_RATIO * 100;
 #endif
 
+#define Z_ADJUST_BYTE 0
 
 // comm variables
 #define MAX_CMD_SIZE 96
@@ -121,10 +125,10 @@ int tt = 0, bt = 0;
   int pTerm;
   int iTerm;
   int dTerm;
-      //int output;
+  int output;
   int error;
-  int temp_iState_min = 100 * -PID_INTEGRAL_DRIVE_MAX / PID_IGAIN;
-  int temp_iState_max = 100 * PID_INTEGRAL_DRIVE_MAX / PID_IGAIN;
+  int temp_iState_min = -PID_INTEGRAL_DRIVE_MAX / PID_IGAIN;
+  int temp_iState_max = PID_INTEGRAL_DRIVE_MAX / PID_IGAIN;
 #endif
 #ifdef SMOOTHING
   uint32_t nma = 0;
@@ -601,8 +605,10 @@ inline void process_commands()
             destination[2] = 10 * Z_HOME_DIR;
             prepare_move();
           
-            current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
-            destination[2] = current_position[2];
+            
+            current_position[2] = (Z_HOME_DIR == -1) ? (float)byteToint(EEPROM.read(Z_ADJUST_BYTE))/100 : Z_MAX_LENGTH;
+            //current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
+            //destination[2] = current_position[2];
             feedrate = 0;
           
         }
@@ -758,6 +764,16 @@ inline void process_commands()
         #endif
         return;
         //break;
+      case 205:
+          Serial.print("o:");
+          Serial.print(output);
+          Serial.print(", p:");
+          Serial.print(pTerm);
+          Serial.print(", i:");
+          Serial.print(iTerm);
+          Serial.print(", d:");
+          Serial.print(dTerm);
+          return;
       case 109: // M109 - Wait for extruder heater to reach target.
         if (code_seen('S')) target_raw = temp2analogh(code_value());
         #ifdef WATCHPERIOD
@@ -903,6 +919,11 @@ inline void process_commands()
         }
         break;
       #endif
+      case 203: // M203 - set Z height adjustment
+        if(code_seen('Z')){
+          EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
+        }
+        break;
     }
     
   }
@@ -913,6 +934,14 @@ inline void process_commands()
   
   ClearToSend();
       
+}
+
+int byteToint(byte value){
+    if(value>>7)
+    {
+      return (255-value+1)*-1;
+    }
+    return value;
 }
 
 void FlushSerialRequestResend()
@@ -1290,6 +1319,7 @@ inline void linear_move(unsigned long axis_steps_remaining[]) // make linear mov
     if (destination[i] > current_position[i]) current_position[i] = current_position[i] + steps_taken[i] /  axis_steps_per_unit[i];
     else current_position[i] = current_position[i] - steps_taken[i] / axis_steps_per_unit[i];
   }
+  current_position[3]=0;
 }
 
 void do_step(int axis) {
@@ -1420,13 +1450,14 @@ void manage_heater()
   #if (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675) || defined (HEATER_USES_AD595)
     #ifdef PIDTEMP
       error = target_raw - current_raw;
-      pTerm = (PID_PGAIN * error) / 100;
+      pTerm = PID_PGAIN * error;
       temp_iState += error;
       temp_iState = constrain(temp_iState, temp_iState_min, temp_iState_max);
-      iTerm = (PID_IGAIN * temp_iState) / 100;
-      dTerm = (PID_DGAIN * (current_raw - temp_dState)) / 100;
+      iTerm = PID_IGAIN * temp_iState;
+      dTerm = PID_DGAIN * (current_raw - temp_dState);
       temp_dState = current_raw;
-      analogWrite(HEATER_0_PIN, constrain(pTerm + iTerm - dTerm, 0, PID_MAX));
+      output=constrain(pTerm + iTerm - dTerm, 0, PID_MAX);
+      analogWrite(HEATER_0_PIN, output);
     #else
       if(current_raw >= target_raw)
       {
