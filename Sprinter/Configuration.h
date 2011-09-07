@@ -117,6 +117,9 @@ char uuid[] = "00000000-0000-0000-0000-000000000000";
 #define PID_DGAIN 0.01 //100 is 1.0
 #endif
 
+//M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
+#define NZONE 2
+
 // How often should the heater check for new temp readings, in milliseconds
 #define HEATER_CHECK_INTERVAL 112
 #define BED_CHECK_INTERVAL 5000
