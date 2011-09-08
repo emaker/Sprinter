@@ -110,15 +110,15 @@ char uuid[] = "00000000-0000-0000-0000-000000000000";
 // Uncomment the following line to enable PID support. This is untested and could be disastrous. Be careful.
 #define PIDTEMP 1
 #ifdef PIDTEMP
-#define PID_MAX 255 // limits current to nozzle
-#define PID_INTEGRAL_DRIVE_MAX 125
-#define PID_PGAIN 1.10 //100 is 1.0
-#define PID_IGAIN 0.01 //100 is 1.0
-#define PID_DGAIN 0.01 //100 is 1.0
+int pid_max = 255; // limits current to nozzle
+int pid_i_max = 125;
+double Kp = 1.10; //100 is 1.0
+double Ki = 0.01; //100 is 1.0
+double Kd = 0.01; //100 is 1.0
 #endif
 
 //M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
-#define NZONE 2
+int nzone = 2;
 
 // How often should the heater check for new temp readings, in milliseconds
 #define HEATER_CHECK_INTERVAL 112

@@ -127,8 +127,8 @@ int tt = 0, bt = 0;
   int dTerm;
   int output;
   int error;
-  int temp_iState_min = -PID_INTEGRAL_DRIVE_MAX / PID_IGAIN;
-  int temp_iState_max = PID_INTEGRAL_DRIVE_MAX / PID_IGAIN;
+  int temp_iState_min = -pid_i_max / Ki;
+  int temp_iState_max = pid_i_max / Ki;
 #endif
 #ifdef SMOOTHING
   uint32_t nma = 0;
@@ -775,7 +775,7 @@ inline void process_commands()
           Serial.print(dTerm);
           return;
       case 109: // M109 - Wait for extruder heater to reach target.
-        if (code_seen('S')) target_raw = temp2analogh(code_value() - NZONE);
+        if (code_seen('S')) target_raw = temp2analogh(code_value() - nzone);
         #ifdef WATCHPERIOD
             if(target_raw>current_raw){
                 watchmillis = max(1,millis());
@@ -924,6 +924,24 @@ inline void process_commands()
           EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
         }
         break;
+#ifdef PIDTEMP
+      case 301: // M301
+        if(code_seen('P')) Kp = code_value();
+        if(code_seen('I')) Ki = code_value();
+        if(code_seen('D')) Kd = code_value();
+        if(code_seen('F')) pid_max = code_value();
+        if(code_seen('Z')) nzone = code_value();
+        if(code_seen('W')) pid_i_max = code_value();
+        Serial.print("Kp ");Serial.println(Kp);
+        Serial.print("Ki ");Serial.println(Ki);
+        Serial.print("Kd ");Serial.println(Kd);
+        Serial.print("PID_MAX ");Serial.println(pid_max);
+        Serial.print("PID_I_MAX ");Serial.println(pid_i_max);
+        Serial.print("NZONE ");Serial.println(nzone);
+        temp_iState_min = -pid_i_max / Ki;
+        temp_iState_max = pid_i_max / Ki;
+        break;
+#endif //PIDTEMP
     }
     
   }
@@ -1450,13 +1468,13 @@ void manage_heater()
   #if (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675) || defined (HEATER_USES_AD595)
     #ifdef PIDTEMP
       error = target_raw - current_raw;
-      pTerm = PID_PGAIN * error;
+      pTerm = Kp * error;
       temp_iState += error;
       temp_iState = constrain(temp_iState, temp_iState_min, temp_iState_max);
-      iTerm = PID_IGAIN * temp_iState;
-      dTerm = PID_DGAIN * (current_raw - temp_dState);
+      iTerm = Ki * temp_iState;
+      dTerm = Kd * (current_raw - temp_dState);
       temp_dState = current_raw;
-      output=constrain(pTerm + iTerm - dTerm, 0, PID_MAX);
+      output=constrain(pTerm + iTerm - dTerm, 0, pid_max);
       analogWrite(HEATER_0_PIN, output);
     #else
       if(current_raw >= target_raw)
