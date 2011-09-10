@@ -1,4 +1,4 @@
-// Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+        // Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 // Licence: GPL
 
 #include "fastio.h"
@@ -765,7 +765,7 @@ inline void process_commands()
         return;
         //break;
       case 205:
-          Serial.print("o:");
+          Serial.print("ok o:");
           Serial.print(output);
           Serial.print(", p:");
           Serial.print(pTerm);

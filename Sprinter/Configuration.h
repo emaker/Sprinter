@@ -111,14 +111,14 @@ char uuid[] = "00000000-0000-0000-0000-000000000000";
 #define PIDTEMP 1
 #ifdef PIDTEMP
 int pid_max = 255; // limits current to nozzle
-int pid_i_max = 125;
+int pid_i_max = 130;//125;
 double Kp = 1.10; //100 is 1.0
 double Ki = 0.01; //100 is 1.0
 double Kd = 0.01; //100 is 1.0
 #endif
 
 //M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
-int nzone = 2;
+int nzone = 5;//2;
 
 // How often should the heater check for new temp readings, in milliseconds
 #define HEATER_CHECK_INTERVAL 112
