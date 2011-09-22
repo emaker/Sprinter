@@ -120,6 +120,8 @@ double Kd = 0.01; //100 is 1.0
 //M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
 int nzone = 5;//2;
 
+#define DEBUG_PID
+
 // How often should the heater check for new temp readings, in milliseconds
 #define HEATER_CHECK_INTERVAL 112
 #define BED_CHECK_INTERVAL 5000
@@ -236,7 +238,7 @@ const short temptable[NUMTEMPS][2] = {
 };
 
 //bed temp table, 100k EPCOS
-#define BNUMTEMPS 33
+#define BNUMTEMPS 34
 const short bedtemptable[BNUMTEMPS][2] = {
    {1, 628},
    {32, 254},
@@ -270,7 +272,8 @@ const short bedtemptable[BNUMTEMPS][2] = {
    {900, 48},
    {931, 40},
    {962, 31},
-   {993, 17}
+   {993, 17},
+   {1008,0}
 };
 
 /****************************************************************************************

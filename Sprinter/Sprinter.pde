@@ -1,4 +1,4 @@
-        // Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+// Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 // Licence: GPL
 
 #include "fastio.h"
@@ -755,7 +755,19 @@ inline void process_commands()
             Serial.print(tt); 
           #if TEMP_1_PIN > -1 || defined BED_USES_AD595
             Serial.print(" B:");
-            Serial.println(bt); 
+            Serial.println(bt);
+#ifdef DEBUG_PID
+            Serial.print(" R:");
+            Serial.print(output);
+            Serial.print(" E:");
+            Serial.print(error);
+            Serial.print(" current:");
+            Serial.print(current_raw);
+            Serial.print(" target:");
+            Serial.print(target_raw);
+            Serial.print(" iState:");
+            Serial.println(temp_iState);                        
+#endif
           #else
             Serial.println();
           #endif
