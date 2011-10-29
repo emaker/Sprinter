@@ -23,7 +23,7 @@
 
 //// Calibration variables
 // X, Y, Z, E steps per unit - Metric Prusa Mendel with Wade extruder:
-float axis_steps_per_unit[] = {91.4286, 91.4286,4000,980};
+float axis_steps_per_unit[] = {91.4286, 91.4286,4000,910};
 
 //// Endstop Settings
 #define ENDSTOPPULLUPS 1 // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
