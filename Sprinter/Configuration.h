@@ -23,7 +23,8 @@
 
 //// Calibration variables
 // X, Y, Z, E steps per unit - Metric Prusa Mendel with Wade extruder:
-float axis_steps_per_unit[] = {91.4286, 91.4286,4000,910};
+//float axis_steps_per_unit[] = {91.4286, 91.4286,4000,910};
+float axis_steps_per_unit[] = {80,80,4571.429,880};
 
 //// Endstop Settings
 #define ENDSTOPPULLUPS 1 // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
@@ -120,7 +121,7 @@ double Kd = 0.01; //100 is 1.0
 //M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
 int nzone = 5;//2;
 
-#define DEBUG_PID
+//#define DEBUG_PID
 
 // How often should the heater check for new temp readings, in milliseconds
 #define HEATER_CHECK_INTERVAL 112
@@ -287,7 +288,9 @@ const short bedtemptable[BNUMTEMPS][2] = {
 #if MOTHERBOARD == 6
 #define KNOWN_BOARD 1
 #ifndef __AVR_ATmega644P__
+#ifndef __AVR_ATmega1284P__
 #error Oops!  Make sure you have 'Sanguino' selected from the 'Tools -> Boards' menu.
+#endif
 #endif
 
 #define X_STEP_PIN         15
